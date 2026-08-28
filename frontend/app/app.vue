@@ -1,6 +1,8 @@
+<script setup lang="ts">
+import Dashboard from "./dashboard.vue";
+</script>
+
 <template>
-  <div>
-    <NuxtRouteAnnouncer />
-    <NuxtWelcome />
-  </div>
+  <Dashboard />
 </template>
+
