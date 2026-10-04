@@ -8,3 +8,5 @@ CMakeCache.txt
 x64
 build/
 .env
+inventory.xml
+/.vs

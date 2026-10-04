@@ -1,8 +1,5 @@
-# CMakeLists.txt
-# Dylan Armstrong, 2026
-
+# CMakeLists.txt # Dylan Armstrong, 2026
 cmake_minimum_required(VERSION 3.20)
-
 project(LegoSorter
     VERSION 1.0.0
     LANGUAGES CXX
@@ -27,7 +24,9 @@ file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
 )
 
+# Find dependencies cleanly
 find_package(OpenSSL REQUIRED)
+find_package(nlohmann_json 3.11.3 REQUIRED)
 
 # Executable
 add_executable(${PROJECT_NAME}
@@ -35,13 +34,15 @@ add_executable(${PROJECT_NAME}
     ${PROJECT_HEADERS}
 )
 
-target_link_libraries(LegoSorter PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+# Link the libraries using their official targets
+target_link_libraries(${PROJECT_NAME} 
+    PRIVATE 
+        OpenSSL::SSL 
+        OpenSSL::Crypto 
+        nlohmann_json::nlohmann_json
+)
 
-
-# Allow:
-#   #include "Foo.h"
-#
-# from headers inside include/
+# Local include directories
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/include"
@@ -50,21 +51,14 @@ target_include_directories(${PROJECT_NAME}
 
 # Compiler warnings
 if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE
-        /W4
-        /permissive-
-    )
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive-)
 else()
-    target_compile_options(${PROJECT_NAME} PRIVATE
-        -Wall
-        -Wextra
-        -Wpedantic
-    )
+    target_compile_options(${PROJECT_NAME} PRIVATE "-Wall" "-Wextra" "-Wpedantic")
 endif()
 
 if(APPLE)
-    target_link_libraries(LegoSorter PRIVATE 
-        "-framework CoreFoundation" 
-        "-framework Security"
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+         "-framework CoreFoundation"
+         "-framework Security"
     )
 endif()
