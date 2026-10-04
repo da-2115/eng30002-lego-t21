@@ -27,11 +27,16 @@ file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
 )
 
+find_package(OpenSSL REQUIRED)
+
 # Executable
 add_executable(${PROJECT_NAME}
     ${PROJECT_SOURCES}
     ${PROJECT_HEADERS}
 )
+
+target_link_libraries(LegoSorter PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+
 
 # Allow:
 #   #include "Foo.h"
@@ -54,5 +59,12 @@ else()
         -Wall
         -Wextra
         -Wpedantic
+    )
+endif()
+
+if(APPLE)
+    target_link_libraries(LegoSorter PRIVATE 
+        "-framework CoreFoundation" 
+        "-framework Security"
     )
 endif()
