@@ -6,7 +6,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 const predictionData = ref<any>(null);
 const isLoadingPrediction = ref(false);
 
-async function predict() {
+async function predict(): Promise<any> {
   isLoadingPrediction.value = true;
   predictionData.value = null;
 
@@ -125,486 +125,274 @@ async function simulateDetection() {
 </script>
 
 <template>
-  <div
-    class="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans flex"
-  >
-    <!-- Sidebar -->
-    <aside
-      class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-5 flex-col justify-between hidden md:flex"
-    >
-      <div>
-        <!-- System Title -->
-        <div
-          class="flex items-center gap-2 mb-6 pb-4 border-b border-gray-100 dark:border-gray-700"
-        >
-          <span
-            class="font-bold text-base tracking-tight text-gray-900 dark:text-white"
-            >Lego Sorter</span
-          >
-        </div>
-      </div>
-
-      <!-- Fixed Connection Status Badge -->
-      <div
-        class="p-3 bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs"
-      >
-        <span class="text-gray-500 font-mono">Hardware:</span>
-        <span
-          class="px-2 py-0.5 text-xs font-semibold rounded bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
-          >Connected</span
-        >
-      </div>
-    </aside>
-
-    <!-- Main Workspace Area -->
-    <main
-      class="flex-1 p-6 md:p-8 overflow-y-auto w-full max-w-[1400px] mx-auto"
-    >
-      <!-- Top Action Bar -->
+  <div class="min-h-screen bg-gray-100 flex items-center justify-center p-3 sm:p-5 md:p-6 text-gray-900">
+    <!-- Central application rectangle -->
+    <main class="w-full max-w-7xl bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden">
+      <!-- Header -->
       <header
-        class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700"
-      >
+        class="min-h-16 px-4 sm:px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-gray-200">
         <div>
-          <h1 class="text-xl font-bold text-gray-900 dark:text-white">
-            Sorter Overview
+          <h1 class="text-lg font-semibold">
+            LEGO Sorter
           </h1>
-          <p class="text-gray-500 dark:text-gray-400 text-xs mt-0.5">
-            Control conveyor hardware and monitor visual brick classification
-            metrics.
+
+          <p class="text-xs text-gray-400">
+            Vision sorting system
           </p>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs text-gray-500">
+          <span class="w-2 h-2 rounded-full bg-green-500"></span>
+          Hardware connected
         </div>
       </header>
 
-      <!-- Dashboard Layout Grid -->
-      <section
-        class="mt-6 rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 flex flex-col justify-between"
-      >
-        <div>
-          <div
-            class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700"
-          >
-            <h2
-              class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300"
-            >
-              Visual Identification
+      <div class="grid grid-cols-1 md:grid-cols-3">
+
+        <!-- CAMERA -->
+        <section class="min-w-0 flex flex-col">
+          <div class="h-12 px-4 sm:px-5 flex items-center border-b border-gray-200">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500">
+              Camera
             </h2>
-            <span
-              class="text-xs text-gray-500 font-mono"
-              v-if="predictionData?.listing_id"
-            >
-              ID: {{ predictionData.listing_id.substring(4, 12) }}
+          </div>
+
+          <div class="p-4 sm:p-5">
+            <Camera />
+          </div>
+        </section>
+
+        <!-- PREDICTION -->
+        <section
+          class="min-w-0 flex flex-col border-t border-b md:border-t-0 md:border-b-0 md:border-l md:border-r border-gray-200">
+          <div class="h-12 px-4 sm:px-5 flex items-center justify-between border-b border-gray-200">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500">
+              Identification
+            </h2>
+
+            <span v-if="predictionData?.listing_id" class="text-[10px] font-mono text-gray-400">
+              {{ predictionData.listing_id.substring(4, 12) }}
             </span>
           </div>
 
-          <!-- Call to Action Area -->
-          <div
-            class="p-4 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/20 flex items-center justify-between"
-          >
-            <span class="text-xs text-gray-500"
-              >Trigger hardware visual classification framework:</span
-            >
-            <button
-              @click="predict()"
-              :disabled="isLoadingPrediction"
-              class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 rounded-md transition shadow-sm flex items-center gap-1.5"
-            >
-              <span v-if="isLoadingPrediction" class="animate-pulse"
-                >Analyzing...</span
-              >
-              <span v-else>Predict Model</span>
+          <div class="p-4 border-b border-gray-200">
+            <button @click="predict()" :disabled="isLoadingPrediction"
+              class="w-full rounded-md bg-blue-600 px-4 py-2.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition">
+              {{ isLoadingPrediction ? "Analyzing..." : "Predict Brick" }}
             </button>
           </div>
 
-          <!-- Dynamic Output States -->
-          <div
-            class="p-4 flex flex-col items-center justify-center min-h-[220px]"
-          >
-            <!-- Case A: Loading State Placeholder -->
-            <div v-if="isLoadingPrediction" class="text-center py-6">
-              <div
-                class="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"
-              ></div>
-              <p class="text-xs text-gray-500 font-mono">
-                Running local hardware inference model...
+          <div class="p-4 sm:p-5">
+            <!-- Loading -->
+            <div v-if="isLoadingPrediction" class="min-h-[220px] flex flex-col items-center justify-center text-center">
+              <div class="h-7 w-7 rounded-full border-2 border-blue-600 border-t-transparent animate-spin mb-3" />
+
+              <p class="text-xs text-gray-500">
+                Running inference...
               </p>
             </div>
 
-            <!-- Case B: Empty Initial View State -->
-            <div
-              v-else-if="!predictionData"
-              class="text-center py-6 text-gray-400 dark:text-gray-500"
-            >
-              <svg
-                class="w-10 h-10 mx-auto mb-2 opacity-60"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 002-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                ></path>
+            <!-- Empty -->
+            <div v-else-if="!predictionData"
+              class="min-h-[220px] flex flex-col items-center justify-center text-center text-gray-400">
+              <svg class="w-8 h-8 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01" />
               </svg>
+
               <p class="text-xs">
-                No active scan loaded. Click predict to scan a brick.
+                No prediction yet
               </p>
             </div>
 
-            <!-- Case C: API Error Message Block -->
-            <div
-              v-else-if="predictionData.error"
-              class="w-full bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-md p-3 text-center"
-            >
-              <p class="text-xs font-semibold text-red-800 dark:text-red-400">
+            <!-- Error -->
+            <div v-else-if="predictionData.error" class="rounded-md bg-red-50 border border-red-200 p-4 text-center">
+              <p class="text-xs text-red-600">
                 {{ predictionData.error }}
               </p>
             </div>
 
-            <!-- Case D: Success Data Core Render Output -->
-            <div
-              v-else-if="predictionData?.items?.length"
-              class="w-full flex flex-col gap-4"
-            >
-              <div
-                v-for="item in predictionData.items"
-                :key="item.id"
-                class="flex gap-4 items-start bg-gray-50 dark:bg-gray-900/40 p-3.5 rounded-lg border border-gray-100 dark:border-gray-700/30"
-              >
-                <!-- Thumbnail preview block -->
-                <div
-                  class="w-20 h-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-1 flex items-center justify-center flex-shrink-0 shadow-inner"
-                >
-                  <img
-                    :src="item.img_url"
-                    :alt="item.name"
-                    class="max-w-full max-h-full object-contain"
-                  />
+            <!-- Results -->
+            <div v-else-if="predictionData?.items?.length" class="space-y-3">
+              <article v-for="item in predictionData.items" :key="item.id"
+                class="rounded-md border border-gray-200 p-3">
+                <div class="flex gap-3">
+                  <div class="w-16 h-16 shrink-0 rounded border border-gray-200 flex items-center justify-center">
+                    <img :src="item.img_url" :alt="item.name" class="max-w-full max-h-full object-contain" />
+                  </div>
+
+                  <div class="min-w-0 flex-1">
+                    <div class="flex justify-between gap-2">
+                      <h3 class="text-sm font-semibold truncate">
+                        {{ item.name }}
+                      </h3>
+
+                      <span class="text-xs font-semibold text-green-600 shrink-0">
+                        {{ (item.score * 100).toFixed(1) }}%
+                      </span>
+                    </div>
+
+                    <div class="mt-2 space-y-1 text-[11px] text-gray-500">
+                      <p>
+                        Part:
+                        <span class="text-gray-800">
+                          {{ item.id }}
+                        </span>
+                      </p>
+
+                      <p>
+                        Category:
+                        <span class="text-gray-800">
+                          {{ item.category }}
+                        </span>
+                      </p>
+
+                      <p>
+                        Type:
+                        <span class="text-gray-800 capitalize">
+                          {{ item.type }}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <!-- Metadata Context Columns -->
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-start justify-between gap-2">
-                    <h3
-                      class="text-sm font-bold text-gray-900 dark:text-white truncate"
-                    >
-                      {{ item.name }}
-                    </h3>
-                    <span
-                      class="px-1.5 py-0.5 font-mono text-[10px] font-bold rounded bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300"
-                    >
-                      {{ (item.score * 100).toFixed(1) }}% match
-                    </span>
-                  </div>
-
-                  <div
-                    class="grid grid-cols-2 gap-y-1.5 gap-x-3 mt-2 text-xs font-mono text-gray-500 dark:text-gray-400"
-                  >
-                    <div>
-                      Part ID:
-                      <span
-                        class="text-gray-900 dark:text-gray-200 font-sans font-medium"
-                        >{{ item.id }}</span
-                      >
-                    </div>
-                    <div>
-                      Category:
-                      <span
-                        class="text-gray-900 dark:text-gray-200 font-sans font-medium"
-                        >{{ item.category }}</span
-                      >
-                    </div>
-                    <div>
-                      Type:
-                      <span
-                        class="text-gray-900 dark:text-gray-200 font-sans font-medium capitalize"
-                        >{{ item.type }}</span
-                      >
-                    </div>
-                    <div>
-                      Box Match:
-                      <span
-                        class="text-gray-900 dark:text-gray-200 font-sans font-medium"
-                        >{{
-                          (predictionData.bounding_box.score * 100).toFixed(0)
-                        }}%</span
-                      >
-                    </div>
-                  </div>
-
-                  <!-- External Links Generator Loop -->
-                  <div
-                    class="mt-3 flex gap-2"
-                    v-if="item.external_sites?.length"
-                  >
-                    <a
-                      v-for="site in item.external_sites"
-                      :key="site.name"
-                      :href="site.url"
-                      target="_blank"
-                      class="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium underline"
-                    >
-                      View on
-                      {{ site.name === "bricklink" ? "BrickLink" : site.name }}
-                      <svg
-                        class="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                        ></path>
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sorter Total Summary Count Footer -->
-        <div
-          class="px-4 py-3 bg-gray-50 border-t border-gray-200 dark:bg-gray-900/40 dark:border-gray-700 flex justify-between items-center text-xs text-gray-500"
-        >
-          <span>Inference Framework: Upstream ML Model</span>
-          <span
-            class="font-mono text-[11px]"
-            v-if="predictionData?.bounding_box"
-          >
-            Res: {{ predictionData.bounding_box.image_width }}x{{
-              predictionData.bounding_box.image_height
-            }}
-          </span>
-        </div>
-      </section>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Camera />
-        <section
-          class="mt-6 rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
-        >
-          <div
-            class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700"
-          >
-            <h2
-              class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300"
-            >
-              Recent Detections
-            </h2>
-
-            <span class="text-xs text-gray-500">
-              {{ detections.length }} detected
-            </span>
-          </div>
-
-          <button class="ml-2 underline text-blue-600" @click="predict()">
-            Predict
-          </button>
-
-          <!-- Render the object cleanly in the UI -->
-          <pre
-            class="text-xs bg-gray-50 dark:bg-gray-900 p-2 rounded mt-2 overflow-x-auto"
-          >
-    {{ predictionData }}
-</pre
-          >
-          <div class="p-4">
-            <p
-              v-if="detectionsPending && detections.length === 0"
-              class="text-sm text-gray-500"
-            >
-              Loading detections...
-            </p>
-
-            <div
-              v-else-if="detectionsError && detections.length === 0"
-              class="rounded bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300"
-            >
-              Failed to load detections.
-
-              <button class="ml-2 underline" @click="refreshDetections()">
-                Retry
-              </button>
-            </div>
-
-            <p
-              v-else-if="detections.length === 0"
-              class="text-sm text-gray-500"
-            >
-              No LEGO bricks detected yet.
-            </p>
-
-            <div v-else class="space-y-3">
-              <article
-                v-for="detection in detections"
-                :key="detection.id"
-                class="flex items-center gap-4 rounded-md border border-gray-200 p-3 dark:border-gray-700"
-              >
-                <img
-                  v-if="detection.imageUrl"
-                  :src="detection.imageUrl"
-                  :alt="detection.name"
-                  class="h-14 w-14 rounded bg-gray-100 object-contain"
-                />
-
-                <div class="min-w-0 flex-1">
-                  <div class="flex justify-between gap-3">
-                    <p class="truncate font-semibold">
-                      {{ detection.name }}
-                    </p>
-
-                    <span class="text-sm font-semibold text-green-600">
-                      {{ Math.round(detection.confidence * 100) }}%
-                    </span>
-                  </div>
-
-                  <p class="text-xs text-gray-500">
-                    Part {{ detection.partId }} · {{ detection.colour }} · Bin
-                    {{ detection.binId }}
-                  </p>
-
-                  <p class="mt-1 text-xs text-gray-400">
-                    {{ new Date(detection.detectedAt).toLocaleString() }}
-                  </p>
+                <div v-if="item.external_sites?.length" class="mt-3 pt-3 border-t border-gray-100 flex flex-wrap gap-3">
+                  <a v-for="site in item.external_sites" :key="site.name" :href="site.url" target="_blank"
+                    class="text-[10px] text-blue-600 hover:underline">
+                    {{ site.name === "bricklink" ? "BrickLink" : site.name }}
+                  </a>
                 </div>
               </article>
             </div>
           </div>
         </section>
 
-        <!-- Sorter Status -->
-        <section
-          class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm"
-        >
-          <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-            <h2
-              class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider"
-            >
-              Sorter Status
+        <!-- SORTER -->
+        <section class="min-w-0 flex flex-col">
+          <div class="h-12 px-4 sm:px-5 flex items-center justify-between border-b border-gray-200">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500">
+              Sorter
             </h2>
+
+            <span class="text-[10px] font-semibold uppercase" :class="{
+              'text-green-600': sorter?.mode === 'running',
+              'text-yellow-600':
+                sorter?.mode === 'starting' ||
+                sorter?.mode === 'stopping',
+              'text-red-600': sorter?.mode === 'fault',
+              'text-gray-400': sorter?.mode === 'idle',
+            }">
+              {{ sorter?.mode ?? "Loading" }}
+            </span>
           </div>
 
-          <div class="p-5">
-            <p v-if="sorterPending && !sorter" class="text-sm text-gray-500">
-              Loading sorter status...
-            </p>
+          <div class="p-4 sm:p-5">
+            <div v-if="sorter" class="space-y-5">
+              <!-- Current state -->
+              <div class="rounded-md border border-gray-200 p-5 text-center">
+                <div class="mx-auto mb-3 w-3 h-3 rounded-full" :class="{
+                  'bg-green-500 animate-pulse':
+                    sorter.mode === 'running',
+                  'bg-yellow-500':
+                    sorter.mode === 'starting' ||
+                    sorter.mode === 'stopping',
+                  'bg-red-500':
+                    sorter.mode === 'fault',
+                  'bg-gray-400':
+                    sorter.mode === 'idle',
+                }" />
 
-            <div
-              v-else-if="sorterError && !sorter"
-              class="rounded bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-700 dark:text-red-300"
-            >
-              Failed to load sorter status.
-
-              <button class="ml-2 underline" @click="refreshSorter()">
-                Retry
-              </button>
-            </div>
-
-            <div v-else-if="sorter" class="space-y-5">
-              <!-- Current State -->
-              <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-500 dark:text-gray-400">
-                  State
-                </span>
-
-                <span
-                  class="rounded px-2 py-1 text-xs font-semibold uppercase"
-                  :class="{
-                    'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300':
-                      sorter.mode === 'running',
-                    'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300':
-                      sorter.mode === 'fault',
-                    'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300':
-                      sorter.mode === 'idle',
-                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300':
-                      sorter.mode === 'starting' || sorter.mode === 'stopping',
-                  }"
-                >
+                <p class="text-sm font-semibold capitalize">
                   {{ sorter.mode }}
-                </span>
+                </p>
+
+                <p class="mt-1 text-xs text-gray-400">
+                  {{ sorter.bricksProcessed }} bricks processed
+                </p>
               </div>
 
-              <!-- Statistics -->
+              <!-- Stats -->
               <div class="grid grid-cols-2 gap-3">
-                <div class="rounded-md bg-gray-50 dark:bg-gray-900 p-3">
-                  <p class="text-xs text-gray-500">Processed</p>
+                <div class="border border-gray-200 rounded-md p-3">
+                  <p class="text-[10px] uppercase text-gray-400">
+                    Processed
+                  </p>
 
-                  <p class="mt-1 text-2xl font-bold">
+                  <p class="mt-1 text-xl font-semibold">
                     {{ sorter.bricksProcessed }}
                   </p>
                 </div>
 
-                <div class="rounded-md bg-gray-50 dark:bg-gray-900 p-3">
-                  <p class="text-xs text-gray-500">Bricks/min</p>
+                <div class="border border-gray-200 rounded-md p-3">
+                  <p class="text-[10px] uppercase text-gray-400">
+                    Rate
+                  </p>
 
-                  <p class="mt-1 text-2xl font-bold">
+                  <p class="mt-1 text-xl font-semibold">
                     {{ sorter.bricksPerMinute }}
+                  </p>
+
+                  <p class="text-[10px] text-gray-400">
+                    bricks / min
                   </p>
                 </div>
               </div>
 
+              <!-- Controls -->
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  class="rounded-md bg-green-600 px-3 py-2.5 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-40"
+                  :disabled="sorter.mode !== 'idle'" @click="startSorter">
+                  Start
+                </button>
+
+                <button
+                  class="rounded-md bg-red-600 px-3 py-2.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-40"
+                  :disabled="sorter.mode !== 'running'" @click="stopSorter">
+                  Stop
+                </button>
+              </div>
+
               <!-- Session -->
-              <div class="space-y-2 text-xs text-gray-500 dark:text-gray-400">
-                <p>
-                  Session:
-                  <span class="font-mono">
+              <div class="border-t border-gray-200 pt-4 space-y-2 text-[10px] text-gray-400">
+                <div class="flex justify-between gap-3">
+                  <span>Session</span>
+
+                  <span class="font-mono truncate">
                     {{ sorter.sessionId ?? "None" }}
                   </span>
-                </p>
+                </div>
 
-                <p>
-                  Started:
-                  <span>
+                <div class="flex justify-between gap-3">
+                  <span>Started</span>
+
+                  <span class="text-right">
                     {{
                       sorter.startedAt
                         ? new Date(sorter.startedAt).toLocaleString()
                         : "Not running"
                     }}
                   </span>
+                </div>
+              </div>
+
+              <!-- DEV -->
+              <div class="border-t border-gray-200 pt-4">
+                <p class="mb-2 text-[10px] uppercase text-gray-400">
+                  Development
                 </p>
-              </div>
-
-              <!-- Error -->
-              <div
-                v-if="sorter.lastError"
-                class="rounded bg-red-50 dark:bg-red-950/40 p-3 text-xs text-red-700 dark:text-red-300"
-              >
-                {{ sorter.lastError }}
-              </div>
-
-              <!-- Controls -->
-              <div class="grid grid-cols-2 gap-3">
-                <button
-                  class="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  :disabled="sorter.mode !== 'idle'"
-                  @click="startSorter"
-                >
-                  Start
-                </button>
 
                 <button
-                  class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  :disabled="sorter.mode !== 'running'"
-                  @click="stopSorter"
-                >
-                  Stop
-                </button>
-
-                <h5>DEV Only Simulation:</h5>
-                <button
-                  class="col-span-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-                  :disabled="sorter?.mode !== 'running'"
-                  @click="simulateDetection"
-                >
+                  class="w-full rounded-md border border-gray-300 px-3 py-2.5 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+                  :disabled="sorter.mode !== 'running'" @click="simulateDetection">
                   Simulate Brick
                 </button>
               </div>
+            </div>
+
+            <div v-else class="py-10 text-center text-xs text-gray-400">
+              Loading sorter...
             </div>
           </div>
         </section>
