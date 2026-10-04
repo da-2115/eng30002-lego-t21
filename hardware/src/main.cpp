@@ -19,7 +19,7 @@ int main() {
     time_t timestamp;
     time(&timestamp);
     struct tm datetime = *localtime(&timestamp);
-    std::string image_path = strftime(output, 50, "%m/%d/%y", &datetime);
+    std::string image_path = "/home/eng30002/eng30002-legot21/hardware/img/" <<strftime(output, 50, "%m/%d/%y", &datetime);
     int Timeout =1000;
     int result = std::system("rpicam-still --zsl -o " << image_path << ".jpg --timeout " << Timeout);
 
