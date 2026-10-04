@@ -35,26 +35,9 @@ std::string build_bricklink_xml_item(const std::string &item_id, const std::stri
     return xml.str();
 }
 
-int main(int argc, const char* argv[])
+int main(int argc, const char *argv[])
 {
     httplib::Server svr;
-
-    time_t timestamp;
-    time(&timestamp);
-    struct tm datetime = *localtime(&timestamp);
-    std::string image_path = "/home/eng30002/eng30002-legot21/hardware/img/" <<strftime(output, 50, "%m/%d/%y", &datetime);
-    int Timeout =1000;
-    int result = std::system("rpicam-still --zsl -o " << image_path << ".jpg --timeout " << Timeout);
-
-
-
-
-
-
-
-
-
-
 
     // Global CORS Preflight Handler for browsers
     svr.Options(R"((.*))", [](const httplib::Request & /*req*/, httplib::Response &res)
@@ -67,6 +50,38 @@ int main(int argc, const char* argv[])
     // Modified endpoint to process response, write local file, and serve XML
     svr.Get("/api/capture-and-recognize", [](const httplib::Request & /*req*/, httplib::Response &res)
             {
+
+    time_t timestamp;
+    time(&timestamp);
+
+
+    struct tm datetime = *localtime(&timestamp);
+      //char* output;
+      std::ostringstream img_pth;
+    // img_pth << "/home/eng30002/eng30002-legot21/hardware/img/" << strftime(output, 50, "%m/%d/%y", &datetime);
+    // int Timeout =1000;
+    // const char* result = std::system("rpicam-still --zsl -o " << img_pth.str() << ".jpg --timeout " << Timeout);
+
+    char* output = "/home/eng30002/eng30002-legot21/hardware/img/";
+    output += std::strftime(output, 50, "%y%m%d%H%M_%S", &datetime);
+    size_t timeout = 1000;
+    std::string system_string = "rpicam-still --zsl -o ";
+    system_string += output;
+    system_string += ".jpg --timeout ";
+    system_string += timeout;
+    int result = std::system(system_string.c_str());
+
+
+
+
+
+
+
+
+
+
+
+
         res.set_header("Access-Control-Allow-Origin", "*");
 
         // Force the SSLClient to use HTTPS secure port 443 directly
@@ -74,7 +89,7 @@ int main(int argc, const char* argv[])
         client.set_follow_location(true);
 
         
-        std::ifstream file(image_path, std::ios::binary);
+        std::ifstream file(output, std::ios::binary);
 
         if (!file.is_open()) {
             res.status = 500;
@@ -156,7 +171,7 @@ res.set_content(raw_json.dump(), "application/json");
             res.set_content("<ERROR>Failed to reach Brickognize API from C++ server</ERROR>", "application/xml");
         } });
 
-    std::cout << "C++ Backend listening on http://0.0.0" << std::endl;
+    std::cout << "C++ Backend listening on http://0.0.0.0" << std::endl;
     svr.listen("0.0.0.0", 8080);
 
     return 0;
