@@ -26,7 +26,7 @@ file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
 
 # Find dependencies cleanly
 find_package(OpenSSL REQUIRED)
-find_package(nlohmann_json 3.12.0 REQUIRED)
+find_package(nlohmann_json 3.11.3 REQUIRED)
 
 # Executable
 add_executable(${PROJECT_NAME}
