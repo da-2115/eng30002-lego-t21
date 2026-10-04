@@ -1,8 +1,10 @@
 // main.cpp
 // Dylan Armstrong, 2026
-
+// Lachlan Wick, 2026
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 
+#include <ctime>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -13,6 +15,23 @@ constexpr char* BRICKOGNIZE_HOST = "api.brickognize.com";
 
 int main() {
     httplib::Server svr;
+
+    time_t timestamp;
+    time(&timestamp);
+    struct tm datetime = *localtime(&timestamp);
+    std::string image_path =   strftime(output, 50, "%m/%d/%y", &datetime);
+    int Timeout =1000;
+    int result = std::system("rpicam-still --zsl -o " <<image_path<< ".jpg --timeout " << Timeout);
+
+
+
+
+
+
+
+
+
+
 
     // Global CORS Preflight Handler for browsers
     svr.Options(R"((.*))", [](const httplib::Request& /*req*/, httplib::Response& res) {
@@ -29,7 +48,7 @@ int main() {
         httplib::SSLClient client(BRICKOGNIZE_HOST);
         client.set_follow_location(true);
 
-        std::string image_path = "dummy_brick.jpeg"; 
+        
         std::ifstream file(image_path, std::ios::binary);
 
         if (!file.is_open()) {
