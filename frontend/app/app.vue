@@ -5,4 +5,3 @@ import Dashboard from "./dashboard.vue";
 <template>
   <Dashboard />
 </template>
-

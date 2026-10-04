@@ -9,6 +9,7 @@ export interface Detection {
     detectedAt: string
 }
 
+// replace that with db items
 const detections: Detection[] = []
 
 export function useDetectionStore() {
