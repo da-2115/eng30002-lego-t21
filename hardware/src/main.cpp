@@ -50,37 +50,27 @@ int main(int argc, const char *argv[])
     // Modified endpoint to process response, write local file, and serve XML
     svr.Get("/api/capture-and-recognize", [](const httplib::Request & /*req*/, httplib::Response &res)
             {
+        // 1. Fetch current system time safely
+        // time_t timestamp;
+        // time(&timestamp);
+        // struct tm datetime = *localtime(&timestamp);
 
-    time_t timestamp;
-    time(&timestamp);
+        // // 2. Format the time string buffer
+        // char time_buffer[64];
+        // std::strftime(time_buffer, sizeof(time_buffer), "%y%m%d%H%M_%S", &datetime);
+                    
+        // // 3. Build the base output file path using std::string
+        // std::string output_path = "/home/eng30002/eng30002-legot21/hardware/img/";
+        // output_path += time_buffer;
 
+        // // 4. Assemble your system command string cleanly
+        // size_t timeout = 1000;
+        // std::string system_string = "rpicam-still --zsl -o ";
+        // system_string += output_path;
+        // system_string += ".jpg --timeout ";
+        // system_string += std::to_string(timeout); 
 
-    struct tm datetime = *localtime(&timestamp);
-      //char* output;
-      std::ostringstream img_pth;
-    // img_pth << "/home/eng30002/eng30002-legot21/hardware/img/" << strftime(output, 50, "%m/%d/%y", &datetime);
-    // int Timeout =1000;
-    // const char* result = std::system("rpicam-still --zsl -o " << img_pth.str() << ".jpg --timeout " << Timeout);
-
-    char* output = "/home/eng30002/eng30002-legot21/hardware/img/";
-    output += std::strftime(output, 50, "%y%m%d%H%M_%S", &datetime);
-    size_t timeout = 1000;
-    std::string system_string = "rpicam-still --zsl -o ";
-    system_string += output;
-    system_string += ".jpg --timeout ";
-    system_string += timeout;
-    int result = std::system(system_string.c_str());
-
-
-
-
-
-
-
-
-
-
-
+        // int result = std::system(system_string.c_str());
 
         res.set_header("Access-Control-Allow-Origin", "*");
 
@@ -88,8 +78,11 @@ int main(int argc, const char *argv[])
         httplib::SSLClient client(BRICKOGNIZE_HOST, 443);
         client.set_follow_location(true);
 
-        
-        std::ifstream file(output, std::ios::binary);
+        // TODO: Insert terminal command and change image path (Lachlan) 
+
+        // 5. Open the newly captured image file (with the explicit extension)
+        std::string final_image_file = "img/dummy_brick.jpeg";
+        std::ifstream file(final_image_file, std::ios::binary);
 
         if (!file.is_open()) {
             res.status = 500;
@@ -101,13 +94,13 @@ int main(int argc, const char *argv[])
         file.close();
 
         httplib::UploadFormDataItems items = {
-    { "query_image", image_buffer, "brick_photo.jpg", "image/jpeg" }
-};
+            { "query_image", image_buffer, "brick_photo.jpg", "image/jpeg" }
+        };
 
-httplib::Headers headers = {
-    { "User-Agent", "LEGO-Sorter/1.0" },
-    { "Accept", "application/json" }
-};
+        httplib::Headers headers = {
+            { "User-Agent", "LEGO-Sorter/1.0" },
+            { "Accept", "application/json" }
+        };
 
         if (auto api_res = client.Post("/predict/parts/", headers, items)) {
             if (api_res->status == 200) {
@@ -125,7 +118,8 @@ httplib::Headers headers = {
                         
                         if (top_match.is_object()) {
                             std::string bricklink_id = top_match.value("id", "");
-std::string description = top_match.value("name", "");
+                            std::string description = top_match.value("name", "");
+                            
                             // Safely traverse the nested IDs map layer
                             if (top_match.contains("external_ids") && top_match["external_ids"].is_object()) {
                                 auto ext_ids = top_match["external_ids"];
@@ -156,7 +150,7 @@ std::string description = top_match.value("name", "");
                     }
                     
                     res.status = 200;
-res.set_content(raw_json.dump(), "application/json");
+                    res.set_content(raw_json.dump(), "application/json");
 
                 } catch (const json::parse_error& e) {
                     res.status = 500;
@@ -169,7 +163,8 @@ res.set_content(raw_json.dump(), "application/json");
         } else {
             res.status = 502;
             res.set_content("<ERROR>Failed to reach Brickognize API from C++ server</ERROR>", "application/xml");
-        } });
+        } 
+    });
 
     std::cout << "C++ Backend listening on http://0.0.0.0" << std::endl;
     svr.listen("0.0.0.0", 8080);
